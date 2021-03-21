@@ -16,7 +16,7 @@ def getTrainingBatch(batchSize):
         batchSize = len(trainingPath)
 
     for featureVector in trainingPath[:batchSize]:
-        loadFeatureVecotr = np.load("{0}{1}".format(TRAININGFEATUREPATH, featureVector))
+        loadFeatureVector = np.load("{0}{1}".format(TRAININGFEATUREPATH, featureVector))
         featureData = loadFeatureVector[:, 1:]
         data = np.concatenate((data, featureData), axis=0) if np.array(data).size else featureData
         currLabel = feature.getCatFromName(featureVector)

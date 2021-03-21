@@ -13,6 +13,7 @@ from keras.layers import Dense, Dropout
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard,ModelCheckpoint
+import batchExtraction
 
 #################################################################################################
 #################################################################################################
@@ -168,18 +169,18 @@ if __name__ == '__main__':
         #create our training batch generator
         def generator(n):
             while True:
-                batch_x,batch_y = feature.getTrainingBatch(n)
+                batch_x,batch_y = batchExtraction.getTrainingBatch(n)
                 yield batch_x,batch_y
 
         #create our testing batch generator
-        valid_x,valid_y= feature.getTestingBatch()
+        valid_x,valid_y= batchExtraction.getTestingBatch()
         def validationGenerator(x,y):
             while True:
                 yield x,y
 
         #fit the model
         print('begin training')
-        model.fit_generator(generator(100),
+        model.fit(generator(100),
                 epochs=3000,
                 steps_per_epoch=1,
                 validation_data=validationGenerator(valid_x,valid_y),
