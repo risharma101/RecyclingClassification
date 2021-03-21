@@ -69,6 +69,9 @@ if __name__ == '__main__':
     label = getLabel(FILETYPE)
 
     imgFileList = os.listdir(FOLDERPATH)
+    
+    # The 'ground truths' for getting rid of background blobs
+    rgbBackgroundFeatures = background.handleBackgroundBlobs()
 
     # We will just split up the features here and track whether they should be training/validation
     trainingLen = int(len(imgFileList)*.8)
@@ -81,8 +84,6 @@ if __name__ == '__main__':
             isTrainingImg = False
         
         img = cv2.imread("{0}{1}".format(FOLDERPATH,imgName))
-        # The 'ground truths' for getting rid of background blobs
-        rgbBackgroundFeatures = background.handleBackgroundBlobs()
 
         # We need to iterate over all the files in the dir (we will split it 80/20 for training vs test)
 
