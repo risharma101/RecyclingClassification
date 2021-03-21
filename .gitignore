@@ -33,3 +33,4 @@ source/two-path/results
 source/cnn/results
 source/dcnn/results
 source/nn/results
+source/featureextractor/featureInfo/**
