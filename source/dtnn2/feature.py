@@ -64,17 +64,17 @@ def getTestingBatch(imgname=constants.MIXED_FILE,gtname=constants.GROUND_TRUTH,n
 
 #helper function for finding the label of a segmentation based on the file name
 def getCatFromName(filename):
-    if filename.find('treematter') > 0:
+    if 'shells' in filename:
         return 0
-    elif filename.find('plywood') > 0:
+    elif 'plastic_bottles' in filename:
         return 1
-    elif filename.find('cardboard') > 0:
+    elif 'plastic_bags' in filename:
         return 2
-    elif filename.find('bottles') > 0:
+    elif 'paper' in filename:
         return 3
-    elif filename.find('trashbag') > 0:
+    elif 'metal_cans' in filename:
         return 4
-    elif filename.find('blackbag') > 0:
+    elif 'cardboard' in filename:
         return 5
     else:
         return -1
