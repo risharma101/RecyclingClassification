@@ -27,7 +27,7 @@ def getTrainingBatch(batchSize):
 
 
 # Get the validation batch
-def getTestingBatch(batchSize=5):
+def getTestingBatch(batchSize=20):
     testingPath = os.listdir(VALIDATIONFEATUREPATH)
     data = []
     labels = []
@@ -37,6 +37,7 @@ def getTestingBatch(batchSize=5):
         batchSize = len(testingPath)
 
     for featureVector in testingPath[:batchSize]:
+        #print(featureVector)
         # The first column of all these is the label so we can extract that
         loadFeatureVector = np.load("{0}{1}".format(VALIDATIONFEATUREPATH, featureVector))
         featureLabel = [x[0] for x in loadFeatureVector]
@@ -47,8 +48,8 @@ def getTestingBatch(batchSize=5):
         labelArr = np.full(len(featureData),currLabel, dtype=int)
         labels = np.concatenate((labels, labelArr), axis=0)
         test = featureVector
-    print(np.array(data).shape)
-    print(np.array(labels).shape)
+    #print(np.array(data).shape)
+    #print(np.array(labels).shape)
     return np.array(data), np.array(labels)
 
-getTestingBatch()
+#getTestingBatch()

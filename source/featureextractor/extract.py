@@ -130,22 +130,27 @@ if __name__ == '__main__':
 
         # Delete background blobs (for now anything with cos similarity above .8 score)
         backgroundIndexes = [n for n in range(len(cosineSimilarity)) if cosineSimilarity[n] >= 0.8]
-        # data = np.delete(data, backgroundIndexes, axis=0)
-
-
+        print(data.shape)
+        print(label.shape)
+        data = np.delete(data, backgroundIndexes, axis=0)
+        label = np.delete(label, backgroundIndexes, axis=0)
+        print(data.shape)
+        print(label.shape) # We need to set this back to empty
+        
         #PCA ANALYSIS ON DATA INSTANCES. POSSIBLY NOT NECESSARY?
-        # data,pca = utils.getPCA(data)
+        data,pca = utils.getPCA(data)
+        
         data = np.hstack((np.expand_dims(label,axis=1),data))
-
+        label = None
         #SAVE OUTPUT
-        if not os.path.exists('featureInfo'):
-            os.makedirs('featureInfo')
-        if not os.path.exists('featureInfo/training'):
-            os.makedirs('featureInfo/training')
-        if not os.path.exists('featureInfo/validation'):
-            os.makedirs('featureInfo/validation')
+        if not os.path.exists('featureInfoPCA'):
+            os.makedirs('featureInfoPCA')
+        if not os.path.exists('featureInfoPCA/training'):
+            os.makedirs('featureInfoPCA/training')
+        if not os.path.exists('featureInfoPCA/validation'):
+            os.makedirs('featureInfoPCA/validation')
         
         if isTrainingImg:
-            np.save(os.path.join('featureInfo/training',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            np.save(os.path.join('featureInfoPCA/training',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
         else:
-            np.save(os.path.join('featureInfo/validation',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            np.save(os.path.join('featureInfoPCA/validation',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)

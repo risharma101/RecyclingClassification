@@ -8,6 +8,7 @@ import cv2
 import os
 import constants as C
 from time import time
+from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers import Conv2D
@@ -141,7 +142,7 @@ if __name__ == '__main__':
 
         #define the model
         model = Sequential()
-        model.add(Dense(units=100,activation='tanh', input_dim=12))
+        model.add(Dense(units=100,activation='tanh', input_dim=1476))
         model.add(Dropout(0.5))
         model.add(Dense(units=100,activation='tanh'))
         model.add(Dropout(0.5))
@@ -170,20 +171,24 @@ if __name__ == '__main__':
         def generator(n):
             while True:
                 batch_x,batch_y = batchExtraction.getTrainingBatch(n)
+                batch_y = to_categorical(batch_y)
                 yield batch_x,batch_y
 
         #create our testing batch generator
-        valid_x,valid_y= batchExtraction.getTestingBatch()
-        def validationGenerator(x,y):
+        #valid_x,valid_y= batchExtraction.getTestingBatch()
+        #valid_y = to_categorical(valid_y)
+        def validationGenerator():
             while True:
-                yield x,y
+                valid_x, valid_y = batchExtraction.getTestingBatch()
+                valid_y = to_categorical(valid_y)
+                yield valid_x, valid_y
 
         #fit the model
         print('begin training')
-        model.fit(generator(100),
+        model.fit_generator(generator(64),
                 epochs=3000,
                 steps_per_epoch=1,
-                validation_data=validationGenerator(valid_x,valid_y),
+                validation_data=validationGenerator(),
                 validation_steps=1,
                 verbose=2,
                 callbacks=[tensorboard,checkpoint])
