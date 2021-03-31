@@ -31,7 +31,7 @@ parser.add_argument('--rgb',default=False,action='store_const',const=True)
 parser.add_argument('--hsv',default=False,action='store_const',const=True)
 parser.add_argument('--size',default=False,action='store_const',const=True)
 # parser.add_argument('--file',type=str,required=True)
-parser.add_argument('--fileType', type=str,required=True)
+# parser.add_argument('--fileType', type=str,required=True)
 parser.add_argument('--folderPath', type=str, required=True)
 args = parser.parse_args()
 
@@ -68,89 +68,95 @@ if __name__ == '__main__':
     # img = cv2.imread('testImages/' + FILENAME)
     label = getLabel(FILETYPE)
 
-    imgFileList = os.listdir(FOLDERPATH)
+    categoryFileList = os.listdir(FOLDERPATH)
     
     # The 'ground truths' for getting rid of background blobs
     rgbBackgroundFeatures = background.handleBackgroundBlobs()
 
-    # We will just split up the features here and track whether they should be training/validation
-    trainingLen = int(len(imgFileList)*.8)
-    isTrainingImg = True
-    counter = 0
-
-    for imgName in imgFileList:
-        counter += 1
-        if counter > trainingLen:
-            isTrainingImg = False
+    for folderName in categoryFileList:
+        imgFileList = os.listdir("{0}/{1}".format(categoryFileList, folderName))
         
-        img = cv2.imread("{0}{1}".format(FOLDERPATH,imgName))
+        if folderName == 'assorted':
+            continue
 
-        # We need to iterate over all the files in the dir (we will split it 80/20 for training vs test)
+         # We will just split up the features here and track whether they should be training/validation
+        trainingLen = int(len(imgFileList)*.8)
+        isTrainingImg = True
+        counter = 0
 
-        #segment the image
-        blobs, markers,labels = utils.extractBlobs(img)
+        for imgName in imgFileList:
+            counter += 1
+            if counter > trainingLen:
+                isTrainingImg = False
+            
+            img = cv2.imread("{0}{1}/{2}".format(FOLDERPATH,folderName,imgName))
 
-        rgbFeatureList = []
-        #multiprocess the feature extraction
-        manager = Manager()
-        datadump = manager.list()
-        jobs = []
-        max_process = 30
-        for i,b in enumerate(blobs):
-            # This is strictly for getting the rgb value to figure out which blobs are the background
-            rgbFilter = utils.getRGBHist(b)
-            rgbFeatureList.append(rgbFilter)
+            # We need to iterate over all the files in the dir (we will split it 80/20 for training vs test)
 
-            p = Process(target=extractFeatures,args=(b,label,datadump))
-            jobs.append(p)
-            p.start()
+            #segment the image
+            blobs, markers,labels = utils.extractBlobs(img)
 
-            if i % max_process == max_process - 1:
-                for j in jobs: j.join()
-        for j in jobs: j.join()
-        data = np.array([d[0] for d in datadump])
-        label = np.array([d[1] for d in datadump])
-        del datadump
-        del jobs
-        gc.collect()
+            rgbFeatureList = []
+            #multiprocess the feature extraction
+            manager = Manager()
+            datadump = manager.list()
+            jobs = []
+            max_process = 30
+            for i,b in enumerate(blobs):
+                # This is strictly for getting the rgb value to figure out which blobs are the background
+                rgbFilter = utils.getRGBHist(b)
+                rgbFeatureList.append(rgbFilter)
 
-        #Background calculations
+                p = Process(target=extractFeatures,args=(b,label,datadump))
+                jobs.append(p)
+                p.start()
 
-        # Pairwise diff calculation
-        # pairwiseDiff, minIndexList = calculation.calcPairwiseDiff(backgroundBlobs, rgbFeatureList)
-        # background.graphBackgroundCalculation(pairwiseDiff, minIndexList, FILENAME.split(".")[0])
+                if i % max_process == max_process - 1:
+                    for j in jobs: j.join()
+            for j in jobs: j.join()
+            data = np.array([d[0] for d in datadump])
+            label = np.array([d[1] for d in datadump])
+            del datadump
+            del jobs
+            gc.collect()
 
-        #Cosine similarity calcualtion
-        cosineSimilarity, cosineSimMinIndexList = calculation.calcCosineSimilarity(rgbBackgroundFeatures, rgbFeatureList)
-        #background.graphBackgroundCalculation(cosineSimilarity, cosineSimMinIndexList, FILENAME.split(".")[0])
+            #Background calculations
 
-        #MSE calculation
-        # mse, mseMinIndexList = calculation.calcMSE(backgroundBlobs, rgbFeatureList)
-        # background.graphMSECalculation(mse, mseMinIndexList)
+            # Pairwise diff calculation
+            # pairwiseDiff, minIndexList = calculation.calcPairwiseDiff(backgroundBlobs, rgbFeatureList)
+            # background.graphBackgroundCalculation(pairwiseDiff, minIndexList, FILENAME.split(".")[0])
 
-        # Delete background blobs (for now anything with cos similarity above .8 score)
-        backgroundIndexes = [n for n in range(len(cosineSimilarity)) if cosineSimilarity[n] >= 0.8]
-        print(data.shape)
-        print(label.shape)
-        data = np.delete(data, backgroundIndexes, axis=0)
-        label = np.delete(label, backgroundIndexes, axis=0)
-        print(data.shape)
-        print(label.shape) # We need to set this back to empty
-        
-        #PCA ANALYSIS ON DATA INSTANCES. POSSIBLY NOT NECESSARY?
-        data,pca = utils.getPCA(data)
-        
-        data = np.hstack((np.expand_dims(label,axis=1),data))
-        label = None
-        #SAVE OUTPUT
-        if not os.path.exists('featureInfoPCA'):
-            os.makedirs('featureInfoPCA')
-        if not os.path.exists('featureInfoPCA/training'):
-            os.makedirs('featureInfoPCA/training')
-        if not os.path.exists('featureInfoPCA/validation'):
-            os.makedirs('featureInfoPCA/validation')
-        
-        if isTrainingImg:
-            np.save(os.path.join('featureInfoPCA/training',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
-        else:
-            np.save(os.path.join('featureInfoPCA/validation',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            #Cosine similarity calcualtion 
+            cosineSimilarity, cosineSimMinIndexList = calculation.calcCosineSimilarity(rgbBackgroundFeatures, rgbFeatureList)
+            #background.graphBackgroundCalculation(cosineSimilarity, cosineSimMinIndexList, FILENAME.split(".")[0])
+
+            #MSE calculation
+            # mse, mseMinIndexList = calculation.calcMSE(backgroundBlobs, rgbFeatureList)
+            # background.graphMSECalculation(mse, mseMinIndexList)
+
+            # Delete background blobs (for now anything with cos similarity above .8 score)
+            backgroundIndexes = [n for n in range(len(cosineSimilarity)) if cosineSimilarity[n] >= 0.8]
+            print(data.shape)
+            print(label.shape)
+            data = np.delete(data, backgroundIndexes, axis=0)
+            label = np.delete(label, backgroundIndexes, axis=0)
+            print(data.shape)
+            print(label.shape) # We need to set this back to empty
+            
+            #PCA ANALYSIS ON DATA INSTANCES. POSSIBLY NOT NECESSARY?
+            data,pca = utils.getPCA(data)
+            
+            data = np.hstack((np.expand_dims(label,axis=1),data))
+            label = None
+            #SAVE OUTPUT
+            if not os.path.exists('featureInfoPCA'):
+                os.makedirs('featureInfoPCA')
+            if not os.path.exists('featureInfoPCA/training'):
+                os.makedirs('featureInfoPCA/training')
+            if not os.path.exists('featureInfoPCA/validation'):
+                os.makedirs('featureInfoPCA/validation')
+            
+            if isTrainingImg:
+                np.save(os.path.join('featureInfoPCA/training',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            else:
+                np.save(os.path.join('featureInfoPCA/validation',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)

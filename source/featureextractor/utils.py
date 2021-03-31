@@ -130,6 +130,7 @@ def getRGBHist(imageIn, output=False):
     color = ('b','g','r')
     hist = []
     zeropix = np.count_nonzero(np.all(imageIn == [0,0,0],axis=2))
+    blobSize = h*w - zeropix
     for i,col in enumerate(color):
         series = cv2.calcHist([imageIn],[i],None,[256],[0,256])
         series[0] = series[0] - zeropix
@@ -138,7 +139,7 @@ def getRGBHist(imageIn, output=False):
             print(series)
         hist.append(np.ravel(series))
 
-    return np.concatenate(np.array(hist)) / (h*w)
+    return np.concatenate(np.array(hist)) / ((h*w) - blobSize)
 
 #GET HSV FEATURE VECTOR
 def getHSVHist(imageIn):
@@ -146,16 +147,17 @@ def getHSVHist(imageIn):
     color = ('h','s','v')
     hist = []
     zeropix = np.count_nonzero(np.all(imageIn == [0,0,0],axis=2))
+    blobSize = h*w - zeropix
     for i,col in enumerate(color):
         if col == 'h':
             series = cv2.calcHist([imageIn],[i],None,[170],[0,170])
         else:
             series = cv2.calcHist([imageIn],[i],None,[256],[0,256])
-        series = cv2.normalize(series, series, norm_type=cv2.NORM_MINMAX)
         series[0] -= zeropix
+        series = cv2.normalize(series, series, norm_type=cv2.NORM_MINMAX)
         hist.append(np.ravel(series))
 
-    return np.concatenate(np.array(hist)) / (h*w)
+    return np.concatenate(np.array(hist)) / ((h*w) - blobSize)
 
 #GET HOG FEATURES
 #https://stackoverflow.com/questions/28390614/opencv-hogdescripter-python
