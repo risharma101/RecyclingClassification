@@ -114,6 +114,19 @@ def sortOutput(list1, list2):
     temp1, temp2 = zip(*sorted(zip(list1, list2)))
     return temp1, temp2
 
+#HELPER FUNCTION TO GET LABEL BASED ON FILENAME
+def getLabel(filename):
+    group = re.findall("shells|plastic_bottles|plastic_bags|paper|metal_cans|cardboard|assorted",filename)
+    if(len(group) == 0): return -1
+    elif(group[0] == 'shells'): return 0
+    elif(group[0] == 'plastic_bottles'): return 1
+    elif(group[0] == 'plastic_bags'): return 2
+    elif(group[0] == 'paper'): return 3
+    elif(group[0] == 'metal_cans'): return 4
+    elif(group[0] == 'cardboard'): return 5
+    elif(group[0] == 'assorted'): return -1
+    else: print('image belongs to no group'); return -1
+
 #GET PCA FEATURES OVER SEVERAL INSTANCES OF 1-D FEATURE VECTORS
 def getPCA(vec):
     pca = PCA(n_components=0.99)

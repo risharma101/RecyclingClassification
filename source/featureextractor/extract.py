@@ -45,19 +45,6 @@ def extractFeatures(img,label,datadump):
     f5 = utils.getSize(img)
     datadump.append([np.hstack((f1,f2,f3,f4,f5)),label])
 
-#HELPER FUNCTION TO GET LABEL BASED ON FILENAME
-def getLabel(filename):
-    group = re.findall("shells|plastic_bottles|plastic_bags|paper|metal_cans|cardboard|assorted",filename)
-    if(len(group) == 0): return -1
-    elif(group[0] == 'shells'): return 0
-    elif(group[0] == 'plastic_bottles'): return 1
-    elif(group[0] == 'plastic_bags'): return 2
-    elif(group[0] == 'paper'): return 3
-    elif(group[0] == 'metal_cans'): return 4
-    elif(group[0] == 'cardboard'): return 5
-    elif(group[0] == 'assorted'): return -1
-    else: print('image belongs to no group'); return -1
-
 #############################################################################################################
 #############################################################################################################
 if __name__ == '__main__':
@@ -66,7 +53,7 @@ if __name__ == '__main__':
     FOLDERPATH = args.folderPath
     FILETYPE = args.fileType
     # img = cv2.imread('testImages/' + FILENAME)
-    label = getLabel(FILETYPE)
+    label = utils.getLabel(FILETYPE)
 
     categoryFileList = os.listdir(FOLDERPATH)
     
