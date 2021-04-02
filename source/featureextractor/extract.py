@@ -79,16 +79,7 @@ if __name__ == '__main__':
         if folderName == 'assorted':
             continue
 
-         # We will just split up the features here and track whether they should be training/validation
-        trainingLen = int(len(imgFileList)*.8)
-        isTrainingImg = True
-        counter = 0
-
         for imgName in imgFileList:
-            counter += 1
-            if counter > trainingLen:
-                isTrainingImg = False
-            
             img = cv2.imread("{0}{1}/{2}".format(FOLDERPATH,folderName,imgName))
 
             # We need to iterate over all the files in the dir (we will split it 80/20 for training vs test)
@@ -144,19 +135,12 @@ if __name__ == '__main__':
             print(label.shape) # We need to set this back to empty
             
             #PCA ANALYSIS ON DATA INSTANCES. POSSIBLY NOT NECESSARY?
-            data,pca = utils.getPCA(data)
+            #data,pca = utils.getPCA(data)
             
             data = np.hstack((np.expand_dims(label,axis=1),data))
             label = None
             #SAVE OUTPUT
             if not os.path.exists('featureInfoPCA'):
                 os.makedirs('featureInfoPCA')
-            if not os.path.exists('featureInfoPCA/training'):
-                os.makedirs('featureInfoPCA/training')
-            if not os.path.exists('featureInfoPCA/validation'):
-                os.makedirs('featureInfoPCA/validation')
             
-            if isTrainingImg:
-                np.save(os.path.join('featureInfoPCA/training',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
-            else:
-                np.save(os.path.join('featureInfoPCA/validation',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            np.save(os.path.join('featureInfoPCA',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
