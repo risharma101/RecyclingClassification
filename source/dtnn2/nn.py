@@ -167,10 +167,12 @@ if __name__ == '__main__':
         #valid_x,valid_y = feature.getTestingBatch()
         #print('testing batch acquired')
 
+        trainingData, trainingLabels, validationData, validationLabels = batchExtraction.splitData()
+
         #create our training batch generator
         def generator(n):
             while True:
-                batch_x,batch_y = batchExtraction.getTrainingBatch(n)
+                batch_x,batch_y = batchExtraction.getTrainingBatch(trainingData, trainingLabels, n)
                 batch_y = to_categorical(batch_y)
                 yield batch_x,batch_y
 
@@ -179,7 +181,8 @@ if __name__ == '__main__':
         #valid_y = to_categorical(valid_y)
         def validationGenerator():
             while True:
-                valid_x, valid_y = batchExtraction.getTestingBatch()
+                # valid_x, valid_y = batchExtraction.getTestingBatch(validationData, validationLabels)
+                valid_x, valid_y = validationData, validationLabels
                 valid_y = to_categorical(valid_y)
                 yield valid_x, valid_y
 
