@@ -5,6 +5,7 @@ import random
 import cv2
 import os
 import numpy as np
+import re
 import pymeanshift as pms
 from sklearn.decomposition import PCA
 
