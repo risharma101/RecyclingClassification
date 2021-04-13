@@ -8,6 +8,7 @@ import numpy as np
 import re
 import pymeanshift as pms
 from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 ########################################################################
 #Canny image
@@ -133,6 +134,18 @@ def getPCA(vec):
     pca = PCA(n_components=0.99)
     newfeatures = pca.fit_transform(vec)
     return newfeatures,pca
+
+def getLDA(vec, label):
+    x_train = vec[:int(len(vec)*.8)]
+    y_train = label[:int(len(vec)*.8)]
+    x_test = vec[int(len(vec)*.8):]
+    y_test = vec[:int(len(vec)*.8)]
+    
+    lda = LDA(n_components=0.99)
+    x_train = lda.fit_transform(x_train, y_train)
+    x_test = lda.fit(x_test)
+
+    return x_train, y_train, x_test, y_test
 
 ###################################################################################################
 #FEATURE EXTRACTION UTILITY FUNCTIONS

@@ -26,25 +26,28 @@ import feature
 #     return np.array(data), np.array(labels)
 
 PCADATAPATH = '../featureextractor/featureInfoPCA/pca_data.npy'
+LDADATAPATH = '../featureextractor/featureInfoPCA/lda_data.npy'
 
 def splitData():
-    data = np.load(PCADATAPATH)
+    data = np.load(LDADATAPATH)
     featureData = data[:, 1:]
     featureLabels = data[:, 0]
     temp = list(zip(featureData, featureLabels))
     random.shuffle(temp)
     dataArr, labelArr = zip(*temp)
-    trainingData = dataArr[:len(dataArr)*.8]
-    trainingLabels = labelArr[:len(labelArr)*.8]
-    validationData = dataArr[len(dataArr)*.8:]
-    validationLabels = labelArr[:len(labelArr)*.8]
+    trainingData = dataArr[:int(len(dataArr)*.8)]
+    trainingLabels = labelArr[:int(len(labelArr)*.8)]
+    validationData = dataArr[:int(len(dataArr)*.8)]
+    validationLabels = labelArr[:int(len(labelArr)*.8)]
 
-    return trainingData, trainingLabels, validationData, validationLabels
+    return np.array(trainingData), np.array(trainingLabels), np.array(validationData), np.array(validationLabels)
 
 def getTrainingBatch(trainingData, trainingLabels, batchSize):
     temp = list(zip(trainingData, trainingLabels))
     random.shuffle(temp)
     data, label = zip(*temp)
+    data = np.array(data)
+    label = np.array(label)
     return data[:batchSize], label[:batchSize]
 
 # Get the validation batch

@@ -13,7 +13,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
-from keras.callbacks import TensorBoard,ModelCheckpoint
+from keras.callbacks import TensorBoard,ModelCheckpoint,CSVLogger
 import batchExtraction
 
 #################################################################################################
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
         #define the model
         model = Sequential()
-        model.add(Dense(units=100,activation='tanh', input_dim=1476))
+        model.add(Dense(units=100,activation='tanh', input_dim=4))
         model.add(Dropout(0.5))
         model.add(Dense(units=100,activation='tanh'))
         model.add(Dropout(0.5))
@@ -154,10 +154,13 @@ if __name__ == '__main__':
         if not os.path.isdir('log'):
             os.makedirs('log')
 
+        fileCount = len(os.listdir('modelEpochInfo/'))
+
         #initialize model
         model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
         tensorboard = TensorBoard(log_dir="log/{}".format(time()))
         checkpoint = ModelCheckpoint('model/cnn_model.ckpt', monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+        csv_logger = CSVLogger('modelEpochInfo/{0}_version_{1}.csv'.format(time(), fileCount), separator=',', append=True)
 
         #get the training data
         #train_x,train_y = feature.getTrainingBatch(100)
@@ -169,6 +172,10 @@ if __name__ == '__main__':
 
         trainingData, trainingLabels, validationData, validationLabels = batchExtraction.splitData()
 
+        #print('trainingdata: ', trainingData.shape)
+        #print('traininglables:' ,trainingLabels.shape)
+        #print('valid data: ', validationData.shape)
+        #print('validationLables: ', validationLabels.shape)
         #create our training batch generator
         def generator(n):
             while True:
@@ -188,13 +195,13 @@ if __name__ == '__main__':
 
         #fit the model
         print('begin training')
-        model.fit_generator(generator(64),
+        model.fit_generator(generator(2000),
                 epochs=3000,
                 steps_per_epoch=1,
                 validation_data=validationGenerator(),
-                validation_steps=1,
+                validation_steps=40,
                 verbose=2,
-                callbacks=[tensorboard,checkpoint])
+                callbacks=[tensorboard,checkpoint,csv_logger])
 
     elif len(sys.argv) == 4 and sys.argv[1] == 'test':
 
