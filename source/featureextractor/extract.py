@@ -53,7 +53,6 @@ if __name__ == '__main__':
     FOLDERPATH = args.folderPath
     FILETYPE = args.fileType
     # img = cv2.imread('testImages/' + FILENAME)
-    label = utils.getLabel(FILETYPE)
 
     categoryFileList = os.listdir(FOLDERPATH)
     
@@ -61,6 +60,7 @@ if __name__ == '__main__':
     rgbBackgroundFeatures = background.handleBackgroundBlobs()
 
     for folderName in categoryFileList:
+        label = utils.getLabel(folderName)
         imgFileList = os.listdir("{0}/{1}".format(categoryFileList, folderName))
         
         if folderName == 'assorted':
@@ -130,4 +130,4 @@ if __name__ == '__main__':
             if not os.path.exists('featureInfoHSV'):
                 os.makedirs('featureInfoHSV')
             
-            np.save(os.path.join('featureInfoHSV',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            np.save(os.path.join('featureInfoHSV',"{0}_{1}".format(folderName, imgName.split(".")[0])),data)
