@@ -40,10 +40,10 @@ args = parser.parse_args()
 def extractFeatures(img,label,datadump):
     f1 = utils.getRGBHist(img)
     f2 = utils.getHSVHist(img)
-    f3 = utils.getHOG(img)
-    f4 = gabor.run_gabor(img,gabor.build_filters(16)).flatten()
-    f5 = utils.getSize(img)
-    datadump.append([np.hstack((f1,f2,f3,f4,f5)),label])
+    # f3 = utils.getHOG(img)
+    # f4 = gabor.run_gabor(img,gabor.build_filters(16)).flatten()
+    # f5 = utils.getSize(img)
+    datadump.append([np.hstack((f1,f2)),label])
 
 #############################################################################################################
 #############################################################################################################
@@ -127,7 +127,7 @@ if __name__ == '__main__':
             data = np.hstack((np.expand_dims(label,axis=1),data))
             label = None
             #SAVE OUTPUT
-            if not os.path.exists('featureInfoPCA'):
-                os.makedirs('featureInfoPCA')
+            if not os.path.exists('featureInfoHSV'):
+                os.makedirs('featureInfoPCAHSV')
             
-            np.save(os.path.join('featureInfoPCA',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
+            np.save(os.path.join('featureInfoHSV',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)

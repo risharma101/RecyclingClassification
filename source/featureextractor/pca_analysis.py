@@ -2,7 +2,7 @@ import numpy as np
 import os
 import utils
 
-folderPath = 'featureInfo/'
+folderPath = 'featureInfoHSV/'
 
 featureVectorList = os.listdir(folderPath)
 
@@ -39,7 +39,7 @@ def handlePCA(dataArr, labelArr):
     print(pcaData.shape)
     fullData = np.hstack((np.expand_dims(labelArr, axis=1), pcaData))
 
-    np.save('featureInfoPCA/pca_data.npy', fullData)
+    np.save('featureInfoPCA/pca_data_hsv_rgb.npy', fullData)
 
 handlePCA(dataArr, labelArr)
 
