@@ -128,6 +128,6 @@ if __name__ == '__main__':
             label = None
             #SAVE OUTPUT
             if not os.path.exists('featureInfoHSV'):
-                os.makedirs('featureInfoPCAHSV')
+                os.makedirs('featureInfoHSV')
             
             np.save(os.path.join('featureInfoHSV',"{0}_{1}".format(FILETYPE, imgName.split(".")[0])),data)
