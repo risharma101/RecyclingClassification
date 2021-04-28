@@ -133,8 +133,6 @@ def generate_prediction(imgfile, network):
 #################################################################################################
 #################################################################################################
 
-
-
 #main method
 if __name__ == '__main__':
 
@@ -142,7 +140,7 @@ if __name__ == '__main__':
 
         #define the model
         model = Sequential()
-        model.add(Dense(units=100,activation='tanh', input_dim=4))
+        model.add(Dense(units=100,activation='tanh', input_dim=4)) # This input_dim needs to be changed based on what data is being fed in
         model.add(Dropout(0.5))
         model.add(Dense(units=100,activation='tanh'))
         model.add(Dropout(0.5))
@@ -162,15 +160,7 @@ if __name__ == '__main__':
         checkpoint = ModelCheckpoint('model/cnn_model.ckpt', monitor='val_acc', verbose=1, save_best_only=True, mode='max')
         csv_logger = CSVLogger('modelEpochInfo/{0}_version_{1}.csv'.format(time(), fileCount), separator=',', append=True)
 
-        #get the training data
-        #train_x,train_y = feature.getTrainingBatch(100)
-        #print('training data acquired')
-
-        #get the validation data
-        #valid_x,valid_y = feature.getTestingBatch()
-        #print('testing batch acquired')
-
-        trainingData, trainingLabels, validationData, validationLabels = batchExtraction.splitData()
+        trainingData, trainingLabels, validationData, validationLabels = batchExtraction.loadData()
 
         #print('trainingdata: ', trainingData.shape)
         #print('traininglables:' ,trainingLabels.shape)

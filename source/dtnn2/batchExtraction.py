@@ -28,8 +28,10 @@ import feature
 PCADATAPATH = '../featureextractor/featureInfoPCA/pca_data.npy'
 LDADATAPATH = '../featureextractor/featureInfoPCA/lda_data.npy'
 
+SAVEPATH = 'splitData/pcaSplitData'
+
 def splitData():
-    data = np.load(LDADATAPATH)
+    data = np.load(PCADATAPATH)
     featureData = data[:, 1:]
     featureLabels = data[:, 0]
     temp = list(zip(featureData, featureLabels))
@@ -40,7 +42,19 @@ def splitData():
     validationData = dataArr[:int(len(dataArr)*.8)]
     validationLabels = labelArr[:int(len(labelArr)*.8)]
 
-    return np.array(trainingData), np.array(trainingLabels), np.array(validationData), np.array(validationLabels)
+    np.save('{0}/training_data.npy'.format(SAVEPATH), np.array(trainingData))
+    np.save('{0}/training_labels.npy'.format(SAVEPATH), np.array(trainingLabels))
+    np.save('{0}/validation_data.npy'.format(SAVEPATH), np.array(validationData))
+    np.save('{0}/validation_labels.npy'.format(SAVEPATH), np.array(validationLables))
+
+def loadData():
+    trainingData = np.load('./{0}/training_data.npy'.format(SAVEPATH))
+    trainingLabels = np.load('./{0}/training_labels.npy'.format(SAVEPATH))
+    validationData = np.load('./{0}/validation_data.npy'.format(SAVEPATH))
+    validationLabels = np.load('./{0}/validation_labels.npy'.format(SAVEPATH))
+
+    return trainingData, trainingLabels, validationData, validationLabels
+
 
 def getTrainingBatch(trainingData, trainingLabels, batchSize):
     temp = list(zip(trainingData, trainingLabels))
@@ -50,30 +64,5 @@ def getTrainingBatch(trainingData, trainingLabels, batchSize):
     label = np.array(label)
     return data[:batchSize], label[:batchSize]
 
-# Get the validation batch
-# def getTestingBatch(batchSize=20):
-#     testingPath = os.listdir(VALIDATIONFEATUREPATH)
-#     data = []
-#     labels = []
-#     test = 0
-#     random.shuffle(testingPath)
-#     if batchSize > len(testingPath):
-#         batchSize = len(testingPath)
 
-#     for featureVector in testingPath[:batchSize]:
-#         #print(featureVector)
-#         # The first column of all these is the label so we can extract that
-#         loadFeatureVector = np.load("{0}{1}".format(VALIDATIONFEATUREPATH, featureVector))
-#         featureLabel = [x[0] for x in loadFeatureVector]
-#         featureData = loadFeatureVector[:, 1:]
-#         data = np.concatenate((data, featureData), axis=0) if np.array(data).size else featureData
-#         currLabel = feature.getCatFromName(featureVector)
-#         #labelArr = np.empty(len(featureData))
-#         labelArr = np.full(len(featureData),currLabel, dtype=int)
-#         labels = np.concatenate((labels, labelArr), axis=0)
-#         test = featureVector
-#     #print(np.array(data).shape)
-#     #print(np.array(labels).shape)
-#     return np.array(data), np.array(labels)
-
-#getTestingBatch()
+splitData()
