@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # FILENAME = args.file
     FOLDERPATH = args.folderPath
-    FILETYPE = args.fileType
+    #FILETYPE = args.fileType
     # img = cv2.imread('testImages/' + FILENAME)
 
     categoryFileList = os.listdir(FOLDERPATH)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     for folderName in categoryFileList:
         label = utils.getLabel(folderName)
-        imgFileList = os.listdir("{0}/{1}".format(categoryFileList, folderName))
+        imgFileList = os.listdir("{0}{1}".format(FOLDERPATH, folderName))
         
         if folderName == 'assorted':
             continue

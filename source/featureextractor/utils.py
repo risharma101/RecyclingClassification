@@ -175,6 +175,8 @@ def getHSVHist(imageIn):
     hist = []
     zeropix = np.count_nonzero(np.all(imageIn == [0,0,0],axis=2))
     blobSize = h*w - zeropix
+    if blobSize < 1:
+        blobSize = 1
     for i,col in enumerate(color):
         if col == 'h':
             series = cv2.calcHist([imageIn],[i],None,[170],[0,170])
@@ -184,7 +186,7 @@ def getHSVHist(imageIn):
         series = cv2.normalize(series, series, norm_type=cv2.NORM_MINMAX)
         hist.append(np.ravel(series))
 
-    return np.concatenate(np.array(hist)) / ((h*w) - blobSize)
+    return np.concatenate(np.array(hist)) / (blobSize)
 
 #GET HOG FEATURES
 #https://stackoverflow.com/questions/28390614/opencv-hogdescripter-python
