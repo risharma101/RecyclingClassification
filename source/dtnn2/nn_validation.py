@@ -24,7 +24,20 @@ def modelValidationInfo():
     softmax_np = softmax.numpy()
 
     predicted_label = tf.argmax(softmax, axis=1)
-    print("Prediction: {}".format(predicted_label[:5])
+    print("Prediction: {}".format(predicted_label[:5]))
     print("    Labels: {}".format(validationLabels[:5]))
+
+    print(confusionMatrix(predicted_label, validationLabels))
+
+def confusionMatrix(predicted, actual):
+    correctCount = [0, 0, 0, 0, 0, 0] # each position represents a label
+    incorrectCount = [0, 0, 0, 0, 0, 0] # each position represents a label
+    for x in range(len(predicted)):
+        if (predicted[x] == actual[x]):
+            correctCount[predicted[x]] += 1
+        else:
+            incorrectCount[predicted[x]] += 1 
+
+    return correctCount, incorrectCount
 
 modelValidationInfo()
