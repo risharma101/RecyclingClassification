@@ -6,6 +6,7 @@ import sys
 import feature
 import cv2
 import os
+import random
 import constants as C
 from time import time
 from keras.utils import to_categorical
@@ -14,7 +15,7 @@ from keras.layers import Dense, Dropout
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard,ModelCheckpoint,CSVLogger
-import batchExtraction
+#import batchExtraction
 
 #################################################################################################
 #################################################################################################
@@ -136,11 +137,14 @@ def generate_prediction(imgfile, network):
 #main method
 if __name__ == '__main__':
 
-    if len(sys.argv) == 2 and sys.argv[1] == 'train':
-
+    if len(sys.argv) == 3 and sys.argv[1] == 'train':
+        dataFolder = 'split_' + sys.argv[2].split(".")[0]
+        if not os.path.exists('splitData/' + dataFolder):
+            print("ERROR: The pca data file name didn't exist")
+            sys.exit()
         #define the model
         model = Sequential()
-        model.add(Dense(units=100,activation='tanh', input_dim=4)) # This input_dim needs to be changed based on what data is being fed in
+        model.add(Dense(units=100,activation='tanh', input_dim=1223)) # This input_dim needs to be changed based on what data is being fed in
         model.add(Dropout(0.5))
         model.add(Dense(units=100,activation='tanh'))
         model.add(Dropout(0.5))
@@ -159,8 +163,28 @@ if __name__ == '__main__':
         tensorboard = TensorBoard(log_dir="log/{}".format(time()))
         checkpoint = ModelCheckpoint('model/cnn_model.ckpt', monitor='val_acc', verbose=1, save_best_only=True, mode='max')
         csv_logger = CSVLogger('modelEpochInfo/{0}_version_{1}.csv'.format(time(), fileCount), separator=',', append=True)
+###
+        def loadData():
+            loadPath = 'splitData/' + dataFolder
+            trainingData = np.load('./{0}/training_data.npy'.format(loadPath))
+            trainingLabels = np.load('./{0}/training_labels.npy'.format(loadPath))
+            validationData = np.load('./{0}/validation_data.npy'.format(loadPath))
+            validationLabels = np.load('./{0}/validation_labels.npy'.format(loadPath))
 
-        trainingData, trainingLabels, validationData, validationLabels = batchExtraction.loadData()
+            return trainingData, trainingLabels, validationData, validationLabels
+
+
+        def getTrainingBatch(trainingData, trainingLabels, batchSize):
+            temp = list(zip(trainingData, trainingLabels))
+            random.shuffle(temp)
+            data, label = zip(*temp)
+            data = np.array(data)
+            label = np.array(label)
+            return data[:batchSize], label[:batchSize]
+
+
+###
+        trainingData, trainingLabels, validationData, validationLabels = loadData()
 
         #print('trainingdata: ', trainingData.shape)
         #print('traininglables:' ,trainingLabels.shape)
@@ -169,7 +193,7 @@ if __name__ == '__main__':
         #create our training batch generator
         def generator(n):
             while True:
-                batch_x,batch_y = batchExtraction.getTrainingBatch(trainingData, trainingLabels, n)
+                batch_x,batch_y = getTrainingBatch(trainingData, trainingLabels, n)
                 batch_y = to_categorical(batch_y)
                 yield batch_x,batch_y
 
@@ -205,7 +229,7 @@ if __name__ == '__main__':
     else:
         print('error! wrong arguments to nn.py')
         print('expecting:')
-        print('python nn.py train')
+        print('python nn.py train [pca_file_name]')
         print('python nn.py test [img_path] [model_path]')
 
 

@@ -1,8 +1,18 @@
 import numpy as np
 import os
 import utils
+import argparse ###
 
-folderPath = 'featureInfoHSV/'
+###
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataFolderPath',type=str,required=True)
+parser.add_argument('--saveFileName',type=str,required=True)
+args = parser.parse_args()
+
+folderPath = args.dataFolderPath 
+###
+
+#folderPath = 'featureInfoHSV/'
 
 featureVectorList = os.listdir(folderPath)
 
@@ -38,8 +48,13 @@ def handlePCA(dataArr, labelArr):
     pcaData, pca = utils.getPCA(dataArr)
     print(pcaData.shape)
     fullData = np.hstack((np.expand_dims(labelArr, axis=1), pcaData))
+    
+    path = 'featureInfoPCA/'
+    if not os.path.exists(path):
+        os.makedirs(path)
 
-    np.save('featureInfoPCA/pca_data_hsv_rgb.npy', fullData)
+    saveFileName = args.saveFileName
+    np.save(path + saveFileName, fullData)
 
 handlePCA(dataArr, labelArr)
 

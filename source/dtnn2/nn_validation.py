@@ -4,13 +4,35 @@ import keras
 import sys
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-import batchExtraction
+#import batchExtraction
 import os
 import numpy as np
 import tensorflow as tf
+import sys
+
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+if len(sys.argv) == 2 and os.path.exists('splitData/split_' + sys.argv[1].split(".")[0]):
+    dataFolder = 'split_' + sys.argv[1].split(".")[0]
+else:
+    print("Error: expecting python nn_validation.py [pca_file_name]")
+    sys.exit()
+
+def loadData():
+    loadPath = 'splitData/' + dataFolder
+    trainingData = np.load('./{0}/training_data.npy'.format(loadPath))
+    trainingLabels = np.load('./{0}/training_labels.npy'.format(loadPath))
+    validationData = np.load('./{0}/validation_data.npy'.format(loadPath))
+    validationLabels = np.load('./{0}/validation_labels.npy'.format(loadPath))
+
+    return trainingData, trainingLabels, validationData, validationLabels
+
 
 def modelValidationInfo():
-    _, _, validationData, validationLabels = batchExtraction.loadData()
+    _, _, validationData, validationLabels = loadData()
     
     validationData = tf.convert_to_tensor(validationData, dtype=tf.float32)
 
@@ -19,7 +41,7 @@ def modelValidationInfo():
 
         #define the model
         model = Sequential()
-        model.add(Dense(units=100,activation='tanh', input_dim=4)) # This input_dim needs to be changed based on what data is being fed in
+        model.add(Dense(units=100,activation='tanh', input_dim=1223)) # This input_dim needs to be changed based on what data is being fed in
         model.add(Dropout(0.5))
         model.add(Dense(units=100,activation='tanh'))
         model.add(Dropout(0.5))
@@ -34,14 +56,16 @@ def modelValidationInfo():
         predictions = model(validationData)
         softmax = tf.nn.softmax(predictions)
         
-        predictions_np = predictions.numpy()
-        softmax_np = softmax.numpy()
+       # predictions_np = predictions.np()
+       # softmax_np = softmax.np()
 
         predicted_label = tf.argmax(softmax, axis=1, output_type=tf.int32).eval()
         print("Prediction: {}".format(predicted_label))
         print("    Labels: {}".format(validationLabels))
 
         print(confusionMatrix(predicted_label, validationLabels))
+
+        modelMetrics(predicted_label, validationLabels)
 
 def confusionMatrix(predicted, actual):
     correctCount = [0, 0, 0, 0, 0, 0] # each position represents a label
@@ -53,5 +77,14 @@ def confusionMatrix(predicted, actual):
             incorrectCount[predicted[x]] += 1 
 
     return correctCount, incorrectCount
+
+def modelMetrics(predicted,actual):
+    print(classification_report(actual, predicted))
+    print(confusion_matrix(actual, predicted))
+    
+
+    #sns.heatmap(confusion_matrix(actual,predicted))
+    #plt.show()
+
 
 modelValidationInfo()

@@ -2,35 +2,45 @@ import numpy as np
 import os
 import random
 import feature
+import argparse
+import sys
 
-# TRAININGFEATUREPATH = "../featureextractor/featureInfo/training/"
-# VALIDATIONFEATUREPATH = "../featureextractor/featureInfo/validation/"
+#parser = argparse.ArgumentParser()
+#parser.add_argument('--pcaFileName', type=str, required=True)
+#args = parser.parse_args()
+#fileName = args.pcaFileName
 
-# # Get the training batch
-# def getTrainingBatch(batchSize):
-#     trainingPath = os.listdir(TRAININGFEATUREPATH)
-#     data = []
-#     labels = []
-#     random.shuffle(trainingPath)
-#     if batchSize > len(trainingPath):
-#         batchSize = len(trainingPath)
+#PCADATAPATH = '../featureextractor/featureInfoPCA/' + fileName
 
-#     for featureVector in trainingPath[:batchSize]:
-#         loadFeatureVector = np.load("{0}{1}".format(TRAININGFEATUREPATH, featureVector))
-#         featureData = loadFeatureVector[:, 1:]
-#         data = np.concatenate((data, featureData), axis=0) if np.array(data).size else featureData
-#         currLabel = feature.getCatFromName(featureVector)
-#         labelArr = np.full(len(featureData), currLabel, dtype=int)
-#         labels = np.concatenate((labels, labelArr), axis=0)
+#if not os.path.exists('splitData'):
+ #   os.makedirs('splitData')
 
-#     return np.array(data), np.array(labels)
 
-PCADATAPATH = '../featureextractor/featureInfoPCA/pca_data.npy'
-LDADATAPATH = '../featureextractor/featureInfoPCA/lda_data.npy'
+#SAVEPATH = 'splitData/split_' + fileName.split(".")[0]
 
-SAVEPATH = 'splitData/pcaSplitData'
+#if not os.path.exists(SAVEPATH):
+ #   os.makedirs(SAVEPATH)
+
+
 
 def splitData():
+    
+    if not len(sys.argv) == 2:
+        print('ERROR! Wrong arguments to bathExtraction.py. Expecting: python batchExtraction.py [pca_File_Name]')
+        sys.exit()
+    elif not os.path.exists('../featureextractor/featureInfoPCA/'+ sys.argv[1].split(".")[0] + '.npy'):
+        print('ERROR! Wrong arguments to bathExtraction.py. Expecting: python batchExtraction.py [pca_File_Name]')
+        sys.exit()
+
+
+    pcaFileName = sys.argv[1].split(".")[0] + '.npy'
+    PCADATAPATH = '../featureextractor/featureInfoPCA/' + pcaFileName
+
+    SAVEPATH = 'splitData/split_' + pcaFileName.split(".")[0]
+
+    if not os.path.exists(SAVEPATH):
+            os.makedirs(SAVEPATH)
+
     data = np.load(PCADATAPATH)
     featureData = data[:, 1:]
     featureLabels = data[:, 0]
@@ -45,13 +55,14 @@ def splitData():
     np.save('{0}/training_data.npy'.format(SAVEPATH), np.array(trainingData))
     np.save('{0}/training_labels.npy'.format(SAVEPATH), np.array(trainingLabels))
     np.save('{0}/validation_data.npy'.format(SAVEPATH), np.array(validationData))
-    np.save('{0}/validation_labels.npy'.format(SAVEPATH), np.array(validationLables))
+    np.save('{0}/validation_labels.npy'.format(SAVEPATH), np.array(validationLabels))
 
-def loadData():
-    trainingData = np.load('./{0}/training_data.npy'.format(SAVEPATH))
-    trainingLabels = np.load('./{0}/training_labels.npy'.format(SAVEPATH))
-    validationData = np.load('./{0}/validation_data.npy'.format(SAVEPATH))
-    validationLabels = np.load('./{0}/validation_labels.npy'.format(SAVEPATH))
+def loadData(loadFolderName):
+    loadPath = 'splitData/' + loadFolderName.split(".")[0]
+    trainingData = np.load('./{0}/training_data.npy'.format(loadPath))
+    trainingLabels = np.load('./{0}/training_labels.npy'.format(loadPath))
+    validationData = np.load('./{0}/validation_data.npy'.format(loadPath))
+    validationLabels = np.load('./{0}/validation_labels.npy'.format(loadPath))
 
     return trainingData, trainingLabels, validationData, validationLabels
 

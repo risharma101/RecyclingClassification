@@ -67,6 +67,12 @@ if __name__ == '__main__':
             continue
 
         for imgName in imgFileList:
+
+            print(imgName)
+
+            if imgName == '.DS_Store':
+                continue
+
             img = cv2.imread("{0}{1}/{2}".format(FOLDERPATH,folderName,imgName))
 
             # We need to iterate over all the files in the dir (we will split it 80/20 for training vs test)
@@ -83,6 +89,10 @@ if __name__ == '__main__':
             for i,b in enumerate(blobs):
                 # This is strictly for getting the rgb value to figure out which blobs are the background
                 rgbFilter = utils.getRGBHist(b)
+               
+                if np.isnan(np.sum(rgbFilter)): # Checks if RGBhist blob contains nan or inf values
+                    continue
+
                 rgbFeatureList.append(rgbFilter)
 
                 p = Process(target=extractFeatures,args=(b,label,datadump))
@@ -121,13 +131,13 @@ if __name__ == '__main__':
             print(data.shape)
             print(label.shape) # We need to set this back to empty
             
-            #PCA ANALYSIS ON DATA INSTANCES. POSSIBLY NOT NECESSARY?
-            #data,pca = utils.getPCA(data)
-            
             data = np.hstack((np.expand_dims(label,axis=1),data))
             label = None
-            #SAVE OUTPUT
-            if not os.path.exists('featureInfoHSV'):
-                os.makedirs('featureInfoHSV')
+           
+           
+           #SAVE OUTPUT
+            path = 'featureInfoHSV/'
+            if not os.path.exists(path):
+                os.makedirs(path)
             
-            np.save(os.path.join('featureInfoHSV',"{0}_{1}".format(folderName, imgName.split(".")[0])),data)
+            np.save(path + imgName.split(".")[0]),data)
